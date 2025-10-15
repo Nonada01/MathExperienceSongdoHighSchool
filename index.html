@@ -1,0 +1,590 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>비눗방울 다면체 만들기 - 수학 체험 전시</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Noto Sans KR', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: #333;
+            line-height: 1.6;
+        }
+
+        header {
+            background: rgba(255, 255, 255, 0.95);
+            padding: 2rem 0;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .header-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 2rem;
+            text-align: center;
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            color: #5a67d8;
+            margin-bottom: 0.5rem;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .subtitle {
+            font-size: 1.2rem;
+            color: #666;
+            font-weight: 500;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 3rem auto;
+            padding: 0 2rem;
+        }
+
+        .intro-section {
+            background: white;
+            border-radius: 20px;
+            padding: 3rem;
+            margin-bottom: 3rem;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            text-align: center;
+        }
+
+        .intro-section h2 {
+            color: #5a67d8;
+            font-size: 2rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .intro-section p {
+            font-size: 1.1rem;
+            color: #555;
+            line-height: 1.8;
+        }
+
+        .exhibit-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 2rem;
+            margin-bottom: 3rem;
+        }
+
+        .exhibit-card {
+            background: white;
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            cursor: pointer;
+        }
+
+        .exhibit-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 15px 40px rgba(0,0,0,0.3);
+        }
+
+        .exhibit-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 2rem;
+            text-align: center;
+        }
+
+        .exhibit-number {
+            background: rgba(255,255,255,0.3);
+            display: inline-block;
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            font-weight: bold;
+            color: white;
+            margin-bottom: 1rem;
+        }
+
+        .exhibit-header h3 {
+            color: white;
+            font-size: 1.8rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .exhibit-body {
+            padding: 2rem;
+        }
+
+        .exhibit-image {
+            width: 100%;
+            height: 250px;
+            background: #f0f0f0;
+            border-radius: 10px;
+            margin-bottom: 1.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 3rem;
+            color: #667eea;
+        }
+
+        .exhibit-description {
+            color: #555;
+            font-size: 1rem;
+            margin-bottom: 1.5rem;
+            line-height: 1.8;
+        }
+
+        .exhibit-features {
+            background: #f8f9ff;
+            padding: 1.5rem;
+            border-radius: 10px;
+            margin-top: 1rem;
+        }
+
+        .exhibit-features h4 {
+            color: #5a67d8;
+            margin-bottom: 1rem;
+            font-size: 1.1rem;
+        }
+
+        .exhibit-features ul {
+            list-style: none;
+            padding-left: 0;
+        }
+
+        .exhibit-features li {
+            padding: 0.5rem 0;
+            padding-left: 1.5rem;
+            position: relative;
+            color: #555;
+        }
+
+        .exhibit-features li:before {
+            content: "✓";
+            position: absolute;
+            left: 0;
+            color: #667eea;
+            font-weight: bold;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.8);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem;
+        }
+
+        .modal.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background: white;
+            border-radius: 20px;
+            padding: 3rem;
+            max-width: 800px;
+            max-height: 90vh;
+            overflow-y: auto;
+            position: relative;
+        }
+
+        .modal-close {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            font-size: 2rem;
+            cursor: pointer;
+            color: #999;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            transition: all 0.3s ease;
+        }
+
+        .modal-close:hover {
+            background: #f0f0f0;
+            color: #333;
+        }
+
+        .modal-title {
+            color: #5a67d8;
+            font-size: 2rem;
+            margin-bottom: 2rem;
+            padding-right: 2rem;
+        }
+
+        .modal-section {
+            margin-bottom: 2rem;
+        }
+
+        .modal-section h4 {
+            color: #667eea;
+            font-size: 1.3rem;
+            margin-bottom: 1rem;
+        }
+
+        .modal-section p {
+            color: #555;
+            line-height: 1.8;
+            margin-bottom: 1rem;
+        }
+
+        .detail-list {
+            background: #f8f9ff;
+            padding: 1.5rem;
+            border-radius: 10px;
+            margin: 1rem 0;
+        }
+
+        .detail-list li {
+            padding: 0.8rem 0;
+            border-bottom: 1px solid #e0e0e0;
+            color: #555;
+        }
+
+        .detail-list li:last-child {
+            border-bottom: none;
+        }
+
+        footer {
+            background: rgba(255,255,255,0.95);
+            padding: 2rem 0;
+            margin-top: 4rem;
+            text-align: center;
+            box-shadow: 0 -4px 6px rgba(0,0,0,0.1);
+        }
+
+        footer p {
+            color: #666;
+            font-size: 0.9rem;
+        }
+
+        @media (max-width: 768px) {
+            h1 {
+                font-size: 2rem;
+            }
+
+            .subtitle {
+                font-size: 1rem;
+            }
+
+            .exhibit-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .modal-content {
+                padding: 2rem;
+            }
+
+            .modal-title {
+                font-size: 1.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="header-content">
+            <h1>🎈 비눗방울 다면체 만들기</h1>
+            <p class="subtitle">만지고, 찾고, 배우는! 입체 도형 수학 체험</p>
+        </div>
+    </header>
+
+    <div class="container">
+        <div class="intro-section">
+            <h2>수학의 원리를 체험으로 배워요!</h2>
+            <p>
+                수학은 단순히 계산하는 것이 아니라 우리 주변의 자연과 생활 속에 숨어있는 아름다운 원리입니다. 
+                무게중심, 최소곡면, 대칭과 균형의 원리를 직접 만지고 체험하며 수학의 즐거움을 느껴보세요!
+            </p>
+        </div>
+
+        <div class="exhibit-grid">
+            <div class="exhibit-card" onclick="openModal('modal1')">
+                <div class="exhibit-header">
+                    <div class="exhibit-number">체험 1</div>
+                    <h3>무게중심 로켓</h3>
+                </div>
+                <div class="exhibit-body">
+                    <div class="exhibit-image">🚀</div>
+                    <p class="exhibit-description">
+                        입체도형 위에 로켓을 세우고 막대와 볼트로 무게중심을 맞춰보세요. 
+                        균형을 찾는 순간의 신비로운 경험을 느낄 수 있습니다!
+                    </p>
+                    <div class="exhibit-features">
+                        <h4>체험 포인트</h4>
+                        <ul>
+                            <li>입체도형 위의 균형잡기</li>
+                            <li>무게중심 원리 이해</li>
+                            <li>직접 조작하며 학습</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <div class="exhibit-card" onclick="openModal('modal2')">
+                <div class="exhibit-header">
+                    <div class="exhibit-number">체험 2</div>
+                    <h3>페르마의 점</h3>
+                </div>
+                <div class="exhibit-body">
+                    <div class="exhibit-image">🫧</div>
+                    <p class="exhibit-description">
+                        삼각형에서 세 꼭짓점까지의 거리 합이 최소가 되는 점을 비눗방울로 찾아보세요. 
+                        자연이 알려주는 최적화의 비밀을 발견할 수 있습니다!
+                    </p>
+                    <div class="exhibit-features">
+                        <h4>체험 포인트</h4>
+                        <ul>
+                            <li>최소곡면 원리 체험</li>
+                            <li>페르마 포인트 발견</li>
+                            <li>자연 속 수학 원리</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <div class="exhibit-card" onclick="openModal('modal3')">
+                <div class="exhibit-header">
+                    <div class="exhibit-number">체험 3</div>
+                    <h3>DIY 피젯스피너</h3>
+                </div>
+                <div class="exhibit-body">
+                    <div class="exhibit-image">⚙️</div>
+                    <p class="exhibit-description">
+                        직접 피젯스피너를 만들며 무게중심과 회전 균형의 원리를 배워보세요. 
+                        내가 만든 스피너가 돌아가는 순간의 감동을 느껴보세요!
+                    </p>
+                    <div class="exhibit-features">
+                        <h4>체험 포인트</h4>
+                        <ul>
+                            <li>직접 제작하는 즐거움</li>
+                            <li>회전 운동과 균형</li>
+                            <li>무게 배분의 중요성</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="modal1" class="modal" onclick="closeModalOnBackground(event, 'modal1')">
+        <div class="modal-content" onclick="event.stopPropagation()">
+            <span class="modal-close" onclick="closeModal('modal1')">×</span>
+            <h2 class="modal-title">🚀 무게중심 로켓</h2>
+            
+            <div class="modal-section">
+                <h4>체험 개요</h4>
+                <p>
+                    로켓 모형 위에 다양한 입체도형을 올려놓고, 막대와 볼트를 사용하여 완벽한 균형을 찾아보는 체험입니다. 
+                    물체의 무게중심이 어디에 있는지 직접 확인하며 물리학의 기본 원리를 배울 수 있습니다.
+                </p>
+            </div>
+
+            <div class="modal-section">
+                <h4>체험 방법</h4>
+                <ul class="detail-list">
+                    <li><strong>1단계:</strong> 로켓 위에 원하는 입체도형을 올려놓습니다</li>
+                    <li><strong>2단계:</strong> 아래 구멍에 막대를 끼웁니다</li>
+                    <li><strong>3단계:</strong> 막대에 볼트를 조여가며 균형을 맞춥니다</li>
+                    <li><strong>4단계:</strong> 로켓이 쓰러지지 않고 서는 순간을 경험합니다</li>
+                </ul>
+            </div>
+
+            <div class="modal-section">
+                <h4>수학·과학 원리</h4>
+                <p>
+                    <strong>무게중심:</strong> 물체의 모든 질량이 집중되어 있다고 가정할 수 있는 점으로, 
+                    이 점을 지지하면 물체가 균형을 이룹니다. 무게중심을 통과하는 연직선 위에 지지점이 있으면 
+                    물체는 안정적으로 서 있을 수 있습니다.
+                </p>
+                <p>
+                    입체도형마다 무게중심의 위치가 다르므로, 막대와 볼트의 위치를 조절하여 
+                    전체 시스템의 무게중심을 지지면 위에 오도록 만드는 것이 이 체험의 핵심입니다.
+                </p>
+            </div>
+
+            <div class="modal-section">
+                <h4>학습 효과</h4>
+                <ul class="detail-list">
+                    <li>무게중심 개념의 직관적 이해</li>
+                    <li>균형과 안정성의 관계 파악</li>
+                    <li>시행착오를 통한 문제해결력 향상</li>
+                    <li>입체도형의 특성 탐구</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <div id="modal2" class="modal" onclick="closeModalOnBackground(event, 'modal2')">
+        <div class="modal-content" onclick="event.stopPropagation()">
+            <span class="modal-close" onclick="closeModal('modal2')">×</span>
+            <h2 class="modal-title">🫧 페르마의 점과 비눗방울</h2>
+            
+            <div class="modal-section">
+                <h4>체험 개요</h4>
+                <p>
+                    삼각형의 세 꼭짓점에서 줄을 매달고 비눗물에 담가 꺼내면, 비눗방울 막이 자연스럽게 
+                    페르마 포인트를 만들어냅니다. 자연이 스스로 최적화된 형태를 찾아가는 과정을 눈으로 확인할 수 있습니다.
+                </p>
+            </div>
+
+            <div class="modal-section">
+                <h4>체험 방법</h4>
+                <ul class="detail-list">
+                    <li><strong>1단계:</strong> 삼각형 모양의 틀을 준비합니다</li>
+                    <li><strong>2단계:</strong> 세 꼭짓점에 줄을 연결합니다</li>
+                    <li><strong>3단계:</strong> 비눗물에 담갔다가 천천히 꺼냅니다</li>
+                    <li><strong>4단계:</strong> 형성된 비눗방울 막의 모양을 관찰합니다</li>
+                </ul>
+            </div>
+
+            <div class="modal-section">
+                <h4>수학 원리: 페르마 포인트</h4>
+                <p>
+                    <strong>페르마의 점:</strong> 삼각형의 세 꼭짓점까지의 거리 합이 최소가 되는 점입니다. 
+                    17세기 수학자 페르마가 제시한 문제로, 이 점에서 세 꼭짓점을 바라보는 각도는 모두 120도입니다.
+                </p>
+                <p>
+                    비눗방울 막은 표면적을 최소화하려는 성질이 있어, 자연스럽게 거리 합이 최소가 되는 
+                    페르마 포인트를 통과하는 형태를 만듭니다. 이는 <strong>최소곡면(Minimal Surface)</strong>의 원리입니다.
+                </p>
+            </div>
+
+            <div class="modal-section">
+                <h4>생활 속 페르마의 점</h4>
+                <ul class="detail-list">
+                    <li><strong>잠자리 날개:</strong> 힘의 분산을 최소화하는 구조</li>
+                    <li><strong>벌집:</strong> 재료를 최소한으로 사용하는 육각형 구조</li>
+                    <li><strong>현무암 기둥:</strong> 자연적으로 형성된 최적 구조</li>
+                    <li><strong>물류 네트워크:</strong> 최단 거리 경로 설계</li>
+                </ul>
+            </div>
+
+            <div class="modal-section">
+                <h4>학습 효과</h4>
+                <ul class="detail-list">
+                    <li>최적화 문제의 직관적 이해</li>
+                    <li>자연 속 수학 원리 발견</li>
+                    <li>표면장력과 최소곡면 개념 학습</li>
+                    <li>기하학적 사고력 향상</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <div id="modal3" class="modal" onclick="closeModalOnBackground(event, 'modal3')">
+        <div class="modal-content" onclick="event.stopPropagation()">
+            <span class="modal-close" onclick="closeModal('modal3')">×</span>
+            <h2 class="modal-title">⚙️ DIY 피젯스피너</h2>
+            
+            <div class="modal-section">
+                <h4>체험 개요</h4>
+                <p>
+                    직접 피젯스피너를 조립하고 꾸미면서, 회전 운동의 원리와 무게중심의 중요성을 배웁니다. 
+                    대칭적으로 무게를 배치해야 잘 돌아가는 원리를 몸소 체험할 수 있습니다.
+                </p>
+            </div>
+
+            <div class="modal-section">
+                <h4>제작 방법</h4>
+                <ul class="detail-list">
+                    <li><strong>1단계:</strong> 피젯스피너 본체와 베어링을 준비합니다</li>
+                    <li><strong>2단계:</strong> 중앙에 베어링을 끼웁니다</li>
+                    <li><strong>3단계:</strong> 양쪽에 무게추를 대칭으로 배치합니다</li>
+                    <li><strong>4단계:</strong> 균형을 확인하며 조정합니다</li>
+                    <li><strong>5단계:</strong> 스티커나 장식으로 꾸밉니다</li>
+                </ul>
+            </div>
+
+            <div class="modal-section">
+                <h4>과학 원리</h4>
+                <p>
+                    <strong>회전 관성:</strong> 물체가 회전 상태를 유지하려는 성질입니다. 
+                    무게가 중심에서 멀리 있을수록 회전 관성이 커져서 더 오래 돌아갑니다.
+                </p>
+                <p>
+                    <strong>대칭과 균형:</strong> 피젯스피너가 부드럽게 회전하려면 무게중심이 회전축과 일치해야 합니다. 
+                    무게추를 대칭적으로 배치하지 않으면 흔들림이 발생합니다.
+                </p>
+                <p>
+                    <strong>마찰과 베어링:</strong> 베어링은 마찰을 최소화하여 오랫동안 회전할 수 있게 합니다. 
+                    볼베어링의 원리를 이해할 수 있습니다.
+                </p>
+            </div>
+
+            <div class="modal-section">
+                <h4>실험해보기</h4>
+                <ul class="detail-list">
+                    <li>무게추를 한쪽에만 배치하면 어떻게 될까요?</li>
+                    <li>무게추를 더 멀리 배치하면 더 오래 돌까요?</li>
+                    <li>다양한 모양의 스피너는 어떻게 다를까요?</li>
+                    <li>회전 속도와 지속 시간의 관계는?</li>
+                </ul>
+            </div>
+
+            <div class="modal-section">
+                <h4>학습 효과</h4>
+                <ul class="detail-list">
+                    <li>회전 운동의 원리 이해</li>
+                    <li>무게중심과 균형 감각 발달</li>
+                    <li>대칭의 중요성 인식</li>
+                    <li>직접 만드는 성취감</li>
+                    <li>과학적 탐구 태도 함양</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <footer>
+        <p>&copy; 2025 비눗방울 다면체 만들기 수학 체험전 | 손도고등학교 수학체험부</p>
+        <p>수학은 체험하는 순간 더 재미있어집니다! 🎈</p>
+    </footer>
+
+    <script>
+        function openModal(modalId) {
+            document.getElementById(modalId).classList.add('active');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeModal(modalId) {
+            document.getElementById(modalId).classList.remove('active');
+            document.body.style.overflow = 'auto';
+        }
+
+        function closeModalOnBackground(event, modalId) {
+            if (event.target.classList.contains('modal')) {
+                closeModal(modalId);
+            }
+        }
+
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') {
+                const modals = document.querySelectorAll('.modal.active');
+                modals.forEach(modal => {
+                    modal.classList.remove('active');
+                });
+                document.body.style.overflow = 'auto';
+            }
+        });
+    </script>
+</body>
+</html>
